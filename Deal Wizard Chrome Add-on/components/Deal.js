@@ -12,6 +12,7 @@ class Deal {
     this.destinationUrl = response?.uniqueId ? 
       `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${response.uniqueId}` : 
       null;
+    this.createdTabId = null; // Store the created tab ID
     
     logger.debug('Deal constructed with URL:', this.destinationUrl);
   }
@@ -24,7 +25,7 @@ class Deal {
       return;
     }
 
-    this.icon.title = this.destinationUrl ? "Click to open deal" : "No deal found";
+    this.icon.title = this.destinationUrl ? "Click to view the deal" : "No deal found";
     this.icon.classList.add("deal-ready");
 
     this.playSuccessSound();
@@ -84,15 +85,16 @@ class Deal {
 
   setupClickHandler() {
     this.icon.addEventListener("click", () => {
-      if (this.response?.tabId) {
-        chrome.runtime.sendMessage({ type: "focusTab", tabId: this.response.tabId });
-      } else if (this.destinationUrl) {
-        logger.info('Opening deal URL:', this.destinationUrl);
-        window.open(this.destinationUrl, "_blank");
-      } else {
-        logger.warn("No deal URL to open.");
+      if (this.createdTabId) {
+        chrome.runtime.sendMessage({ type: "focusTab", tabId: this.createdTabId });
+        logger.info('Focusing existing deal tab:', this.createdTabId);
       }
     });
+  }
+
+  setCreatedTabId(tabId) {
+    this.createdTabId = tabId;
+    logger.debug('Stored created tab ID:', tabId);
   }
 }
 

@@ -275,6 +275,29 @@ class Wizard {
       // Use the full unique ID from the response
       const deal = new Deal(this.icon, { uniqueId: response._id || response.unique_id });
       deal.initialize();
+      
+      // Wait for the deal icon to be fully initialized before opening the tab
+      setTimeout(() => {
+        // Only open the tab if the deal icon is available and visible
+        const dealIcon = document.querySelector('#rm-hover-icon:not(.rm-transition-out)');
+        if (dealIcon && deal.destinationUrl) {
+          logger.info('Deal icon is ready, opening deal URL:', deal.destinationUrl);
+          chrome.runtime.sendMessage({ 
+            type: "analyze", 
+            destinationUrl: deal.destinationUrl
+          }, (response) => {
+            if (response && response.tabId) {
+              deal.setCreatedTabId(response.tabId);
+              logger.info('[DEAL-WIZARD][NAVIGATION] Background tab opened after deal icon ready:', { 
+                destinationUrl: deal.destinationUrl,
+                tabId: response.tabId 
+              });
+            }
+          });
+        } else {
+          logger.info('Deal icon not ready or no destination URL available');
+        }
+      }, 500); // Give enough time for the deal icon to be fully initialized
     }, { once: true });
   }
 }
