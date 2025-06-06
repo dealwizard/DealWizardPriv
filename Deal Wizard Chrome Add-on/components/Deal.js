@@ -8,7 +8,12 @@ class Deal {
   constructor(icon, response) {
     this.icon = icon;
     this.response = response;
-    this.destinationUrl = response?.destinationUrl || null;
+    // Use the complete uniqueId for the URL
+    this.destinationUrl = response?.uniqueId ? 
+      `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${response.uniqueId}` : 
+      null;
+    
+    logger.debug('Deal constructed with URL:', this.destinationUrl);
   }
 
   initialize() {
@@ -82,6 +87,7 @@ class Deal {
       if (this.response?.tabId) {
         chrome.runtime.sendMessage({ type: "focusTab", tabId: this.response.tabId });
       } else if (this.destinationUrl) {
+        logger.info('Opening deal URL:', this.destinationUrl);
         window.open(this.destinationUrl, "_blank");
       } else {
         logger.warn("No deal URL to open.");

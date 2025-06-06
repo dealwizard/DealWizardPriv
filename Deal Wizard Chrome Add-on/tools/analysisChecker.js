@@ -6,13 +6,13 @@ import LoggerFactory, { LogLevel } from './logger.js';
 class AnalysisChecker {
     // Static constants
     static BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io/version-test';
-    static DEFAULT_POLLING_INTERVAL = 5000; // 5 seconds
+    static DEFAULT_POLLING_INTERVAL = 5000; // 10 seconds
 
     constructor() {
         this.isPolling = false;
         this.pollingInterval = null;
         this.logger = LoggerFactory.getLogger('DEAL-WIZARD/CHECKER');
-        this.logger.setLevel(LogLevel.TRACE); // Set to TRACE level for maximum verbosity
+        this.logger.setLevel(LogLevel.DEBUG); // Set to DEBUG level to reduce verbosity
         this.logger.info('AnalysisChecker initialized');
     }
 
@@ -46,12 +46,16 @@ class AnalysisChecker {
             startTime: new Date().toISOString() 
         });
 
-        this.pollingInterval = setInterval(async () => {
+        let attempts = 0;
+        const maxAttempts = 12; // 2 minutes maximum (12 * 10 seconds)
+
+        const checkStatus = async () => {
             try {
+                attempts++;
                 this.logger.info('[POLLING] Checking status', { 
                     uniqueId,
                     timestamp: new Date().toISOString(),
-                    attempt: new Date().getTime()
+                    attempt: attempts
                 });
                 
                 const status = await this.checkBubbleStatus(uniqueId);
@@ -71,7 +75,7 @@ class AnalysisChecker {
                         });
                         this.stopPolling();
                         onComplete(status);
-                        break;
+                        return;
                     case 'error':
                         this.logger.error('[POLLING] Operation failed', null, { 
                             uniqueId, 
@@ -81,7 +85,7 @@ class AnalysisChecker {
                         });
                         this.stopPolling();
                         onError(status.error || 'Analysis failed');
-                        break;
+                        return;
                     case 'generating':
                         this.logger.info('[POLLING] Operation still in progress', { 
                             uniqueId, 
@@ -105,6 +109,17 @@ class AnalysisChecker {
                             checkTime: new Date().toISOString()
                         });
                 }
+
+                if (attempts >= maxAttempts) {
+                    this.logger.error('[POLLING] Polling timeout exceeded', null, { 
+                        uniqueId, 
+                        maxAttempts,
+                        timestamp: new Date().toISOString()
+                    });
+                    this.stopPolling();
+                    onError(new Error('Polling timeout exceeded'));
+                    return;
+                }
             } catch (error) {
                 this.logger.error('[POLLING] Error checking status', error, { 
                     uniqueId,
@@ -117,7 +132,12 @@ class AnalysisChecker {
                 this.stopPolling();
                 onError(error);
             }
-        }, interval);
+        };
+
+        // Initial check
+        checkStatus();
+        // Set up interval
+        this.pollingInterval = setInterval(checkStatus, interval);
     }
 
     /**

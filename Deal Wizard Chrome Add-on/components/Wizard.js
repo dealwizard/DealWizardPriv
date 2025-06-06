@@ -269,8 +269,11 @@ class Wizard {
     this.icon.classList.remove("pulsing");
     this.icon.classList.add("rm-transition-out");
 
+    logger.debug('Transforming to deal with response:', response);
+
     this.icon.addEventListener("animationend", () => {
-      const deal = new Deal(this.icon, response);
+      // Use the full unique ID from the response
+      const deal = new Deal(this.icon, { uniqueId: response._id || response.unique_id });
       deal.initialize();
     }, { once: true });
   }
