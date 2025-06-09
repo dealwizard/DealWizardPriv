@@ -229,16 +229,6 @@ class Wizard {
     // Construct the destination URL with the unique ID
     const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${uniqueId}`;
     
-    // Send message to open new tab in background
-    chrome.runtime.sendMessage({ 
-      type: "analyze", 
-      url: window.location.href,
-      strategy: this.selectedStrategy,
-      destinationUrl: destinationUrl
-    }, (response) => {
-      logger.info('[DEAL-WIZARD][NAVIGATION] Background tab opened:', { destinationUrl });
-    });
-
     // Start polling for analysis status
     if (uniqueId) {
       this.analysisChecker.startPolling(
