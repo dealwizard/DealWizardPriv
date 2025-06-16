@@ -227,7 +227,7 @@ class Wizard {
    */
   startAnalysis(uniqueId) {
     // Construct the destination URL with the unique ID
-    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${uniqueId}`;
+    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
     
     // Start polling for analysis status
     if (uniqueId) {

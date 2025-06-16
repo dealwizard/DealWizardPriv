@@ -5,7 +5,7 @@ import LoggerFactory, { LogLevel } from './logger.js';
  */
 class AnalysisChecker {
     // Static constants
-    static BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io/version-test';
+    static BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io';
     static DEFAULT_POLLING_INTERVAL = 5000; // 10 seconds
 
     constructor() {
@@ -47,7 +47,7 @@ class AnalysisChecker {
         });
 
         let attempts = 0;
-        const maxAttempts = 12; // 2 minutes maximum (12 * 10 seconds)
+        const maxAttempts = 60; // 5 minutes maximum (60 * 5 seconds)
 
         const checkStatus = async () => {
             try {

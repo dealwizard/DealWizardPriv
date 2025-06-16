@@ -10,7 +10,7 @@ class Deal {
     this.response = response;
     // Use the complete uniqueId for the URL
     this.destinationUrl = response?.uniqueId ? 
-      `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${response.uniqueId}` : 
+      `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${response.uniqueId}` : 
       null;
     this.createdTabId = null; // Store the created tab ID
     
