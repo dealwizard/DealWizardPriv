@@ -13,6 +13,18 @@ const DEFAULT_SETTINGS: ExtensionSettings = {
   }
 };
 
+// Define additional message types
+interface AnalyzeMessage extends ExtensionMessage {
+  action: 'analyze';
+  strategy: string;
+  destinationUrl: string;
+}
+
+interface FocusTabMessage extends ExtensionMessage {
+  action: 'focusTab';
+  tabId: number;
+}
+
 // Example of using the chrome API
 chrome.runtime.onInstalled.addListener(() => {
   logger.log('Extension installed');
@@ -64,6 +76,15 @@ chrome.runtime.onMessage.addListener((
         sendResponse({ success: false, error: 'No settings provided' });
       }
       break;
+    
+    case 'analyze':
+      handleAnalyzeMessage(message as AnalyzeMessage, sendResponse);
+      return true; // Keep the message channel open for async response
+      
+    case 'focusTab':
+      handleFocusTabMessage(message as FocusTabMessage);
+      sendResponse({ success: true });
+      break;
       
     default:
       sendResponse({ success: false, error: 'Unknown action' });
@@ -71,3 +92,50 @@ chrome.runtime.onMessage.addListener((
   
   return true; // Keep the message channel open for asynchronous response
 });
+
+/**
+ * Handles analyze message
+ * Creates a tab with the destination URL in the background
+ */
+async function handleAnalyzeMessage(message: AnalyzeMessage, sendResponse: (response: ExtensionResponse) => void): Promise<void> {
+  logger.log('Handling analyze message with strategy:', message.strategy);
+  
+  try {
+    let createdTabId = null;
+    let destinationUrl = message.destinationUrl;
+
+    if (destinationUrl) {
+      // Add https:// prefix if missing
+      if (!destinationUrl.startsWith("http")) {
+        destinationUrl = "https://" + destinationUrl;
+      }
+      const createdTab = await chrome.tabs.create({ url: destinationUrl, active: false });
+      createdTabId = createdTab.id;
+      logger.log("Deal tab opened in background:", destinationUrl);
+    }
+    
+    sendResponse({ 
+      success: true,
+      data: {
+        destinationUrl, 
+        tabId: createdTabId
+      }
+    });
+  } catch (err) {
+    logger.error("Error handling analyze message:", err);
+    sendResponse({ 
+      success: false, 
+      error: err instanceof Error ? err.message : "Unknown error" 
+    });
+  }
+}
+
+/**
+ * Handles focusTab message
+ * Brings the specified tab to focus
+ */
+function handleFocusTabMessage(message: FocusTabMessage): void {
+  logger.log('Focusing tab:', message.tabId);
+  chrome.tabs.update(message.tabId, { active: true })
+    .catch(err => logger.error('Error focusing tab:', err));
+}
