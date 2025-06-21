@@ -1,27 +1,33 @@
-import LoggerFactory from '../utils/logger';
+import LoggerFactory, { Logger } from '../utils/logger';
 import Toast from './toast';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/DEAL');
-logger.info('Deal module loaded');
+const logger: Logger = LoggerFactory.getLogger('DEAL-WIZARD/DEAL');
+logger.info('Deal.js loaded');
 
 interface DealResponse {
-  destinationUrl?: string;
-  tabId?: number;
+  uniqueId?: string;
   [key: string]: any;
 }
 
 class Deal {
   private icon: HTMLImageElement;
-  private response: DealResponse | null;
-  private destinationUrl: string | null;
+  private response: DealResponse;
+  public destinationUrl: string | null;
+  private createdTabId: number | null;
 
-  constructor(icon: HTMLImageElement, response: DealResponse | null) {
+  constructor(icon: HTMLImageElement, response: DealResponse) {
     this.icon = icon;
     this.response = response;
-    this.destinationUrl = response?.destinationUrl || null;
+    // Use the complete uniqueId for the URL
+    this.destinationUrl = response?.uniqueId ? 
+      `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${response.uniqueId}` : 
+      null;
+    this.createdTabId = null; // Store the created tab ID
+    
+    logger.debug('Deal constructed with URL:', this.destinationUrl);
   }
 
-  initialize(): void {
+  public initialize(): void {
     try {
       this.icon.src = chrome.runtime.getURL("assets/deal.png");
     } catch (err) {
@@ -29,7 +35,7 @@ class Deal {
       return;
     }
 
-    this.icon.title = this.destinationUrl ? "Click to open deal" : "No deal found";
+    this.icon.title = this.destinationUrl ? "Click to view the deal" : "No deal found";
     this.icon.classList.add("deal-ready");
 
     this.playSuccessSound();
@@ -61,8 +67,8 @@ class Deal {
   }
 
   private setupHoverHandler(): void {
-    const goalInput = document.querySelector('.goal-input-container');
-    const goalIcon = document.querySelector('.goal-icon-container');
+    const goalInput = document.querySelector('.goal-input-container') as HTMLElement;
+    const goalIcon = document.querySelector('.goal-icon-container') as HTMLElement;
     
     if (goalInput && goalIcon) {
       this.icon.addEventListener("mouseenter", () => {
@@ -89,14 +95,16 @@ class Deal {
 
   private setupClickHandler(): void {
     this.icon.addEventListener("click", () => {
-      if (this.response?.tabId) {
-        chrome.runtime.sendMessage({ type: "focusTab", tabId: this.response.tabId });
-      } else if (this.destinationUrl) {
-        window.open(this.destinationUrl, "_blank");
-      } else {
-        logger.warn("No deal URL to open.");
+      if (this.createdTabId) {
+        chrome.runtime.sendMessage({ action: "focusTab", tabId: this.createdTabId });
+        logger.info('Focusing existing deal tab:', this.createdTabId);
       }
     });
+  }
+
+  public setCreatedTabId(tabId: number): void {
+    this.createdTabId = tabId;
+    logger.debug('Stored created tab ID:', tabId);
   }
 }
 

@@ -91,4 +91,4 @@ class LoggerFactory {
     }
 }
 
-export { LoggerFactory as default, LogLevel };
+export { LoggerFactory as default, LogLevel, Logger};

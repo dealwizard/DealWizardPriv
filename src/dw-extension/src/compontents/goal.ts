@@ -31,7 +31,7 @@ class Goal {
             const input = document.querySelector('#goal-input') as HTMLInputElement;
             if (input) {
                 input.value = savedGoal;
-                window.currentGoal = savedGoal;
+                window.CurrentGoal = savedGoal;
             }
             logger.trace('Loaded saved goal:', savedGoal);
         }
@@ -43,7 +43,7 @@ class Goal {
             const input = document.querySelector('#goal-input') as HTMLInputElement;
             if (input) {
                 input.value = this.goalValue;
-                window.currentGoal = this.goalValue;
+                window.CurrentGoal = this.goalValue;
             }
         });
     }
@@ -52,7 +52,7 @@ class Goal {
         // Listen for goal value requests
         document.addEventListener('getGoalValue', (event: Event) => {
             logger.trace('Received request for goal value:', (event as CustomEvent).detail);
-            window.currentGoal = this.goalValue;
+            window.CurrentGoal = this.goalValue;
             // Dispatch event with goal value
             const goalEvent = new CustomEvent('wizardClickWithGoal', {
                 bubbles: true,
@@ -72,7 +72,7 @@ class Goal {
             input.addEventListener('input', async (event: Event) => {
                 const target = event.target as HTMLInputElement;
                 this.goalValue = target.value;
-                window.currentGoal = this.goalValue;
+                window.CurrentGoal = this.goalValue;
                 // Save to storage
                 await GoalStorage.saveGoal(this.goalValue);
                 logger.trace('Updated and saved goal value:', this.goalValue);
@@ -97,7 +97,7 @@ class Goal {
     private async handleGoalChange(event: Event): Promise<void> {
         const target = event.target as HTMLInputElement;
         this.goalValue = target.value;
-        window.currentGoal = this.goalValue;
+        window.CurrentGoal = this.goalValue;
         // Save to storage
         await GoalStorage.saveGoal(this.goalValue);
         logger.trace('Goal changed and saved:', this.goalValue);

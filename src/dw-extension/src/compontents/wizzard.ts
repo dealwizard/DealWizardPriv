@@ -1,21 +1,22 @@
-import LoggerFactory from '../utils/logger';
+
 import Toast from './toast';
 import Strategy from './strategy';
 import Deal from './deal';
+import AnalysisChecker from '../utils/analysisChecker';
+import LoggerFactory, { Logger } from '../utils/logger';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/WIZARD');
-logger.info('Wizard loaded');
+const logger: Logger = LoggerFactory.getLogger('DEAL-WIZARD/WIZARD');
+logger.info('Wizard.js loaded');
 
-// Declare global window property for currentGoal
-declare global {
-  interface Window {
-    currentGoal?: string;
-  }
+interface DealResponse {
+  _id?: string;
+  unique_id?: string;
+  [key: string]: any;
 }
 
-interface WebhookResponse {
-  destinationUrl?: string;
-  [key: number]: { destinationUrl?: string };
+interface WebhookResponseData {
+  unique_id: string;
+  [key: string]: any;
 }
 
 class Wizard {
@@ -23,6 +24,7 @@ class Wizard {
   private destinationUrl: string | null;
   private selectedStrategy: string | null;
   private strategy: Strategy | null;
+  private analysisChecker: AnalysisChecker;
 
   constructor() {
     logger.info('Wizard constructor called');
@@ -32,6 +34,7 @@ class Wizard {
     this.destinationUrl = null;
     this.selectedStrategy = null;
     this.strategy = null;
+    this.analysisChecker = new AnalysisChecker();
     
     // Create UI elements
     this.initializeUI();
@@ -74,11 +77,11 @@ class Wizard {
     this.icon.title = "Select strategy and click to analyze this property";
     this.icon.classList.add("wizard-intro");
     
-    // // Style the icon
-    // this.icon.style.width = "120px";
-    // this.icon.style.height = "120px";
-    // this.icon.style.cursor = "pointer";
-    // this.icon.style.display = "block";
+    // Style the icon
+    this.icon.style.width = "120px";
+    this.icon.style.height = "120px";
+    this.icon.style.cursor = "pointer";
+    this.icon.style.display = "block";
 
     wrapper.appendChild(this.icon);
     logger.info('Icon created and added to wrapper');
@@ -90,7 +93,7 @@ class Wizard {
   private initializeStrategy(wrapper: HTMLDivElement): void {
     logger.info('Initializing Strategy component');
     this.strategy = new Strategy(wrapper, (selectedStrategy: string | undefined) => {
-      this.handleStrategySelect(selectedStrategy);
+      this.handleStrategySelect(selectedStrategy || '');
     });
   }
 
@@ -98,30 +101,30 @@ class Wizard {
    * Set up event listeners for the UI elements
    */
   private setupEventListeners(wrapper: HTMLDivElement): void {
+    if (!this.icon) return;
+
     // Icon click handler
-    if (this.icon) {
-      this.icon.addEventListener("click", () => this.handleFirstClick());
+    this.icon.addEventListener("click", () => this.handleFirstClick());
 
-      // Animation end handler
-      this.icon.addEventListener("animationend", () => {
-        this.icon?.classList.remove("wizard-intro");
-      }, { once: true });
-    }
+    // Animation end handler
+    this.icon.addEventListener("animationend", () => {
+      if (this.icon) this.icon.classList.remove("wizard-intro");
+    }, { once: true });
 
-    // // Hover tracking
-    // wrapper.addEventListener('mouseenter', () => {
-    //   logger.info('Mouse entered wizard wrapper');
-    // });
+    // Hover tracking
+    wrapper.addEventListener('mouseenter', () => {
+      logger.info('Mouse entered wizard wrapper');
+    });
 
-    // wrapper.addEventListener('mouseleave', () => {
-    //   logger.info('Mouse left wizard wrapper');
-    // });
+    wrapper.addEventListener('mouseleave', () => {
+      logger.info('Mouse left wizard wrapper');
+    });
   }
 
   /**
    * Handle strategy selection
    */
-  private handleStrategySelect(strategy: string | undefined): void {
+  private handleStrategySelect(strategy: string): void {
     if (strategy) {
       logger.info(`Strategy selected: ${strategy}`);
       this.selectedStrategy = strategy;
@@ -153,12 +156,12 @@ class Wizard {
       
       // Wait for goal value to be set
       const checkGoal = (): void => {
-        if (window.currentGoal !== undefined) {
-          const goal = window.currentGoal || '';
+        if (window.CurrentGoal !== undefined) {
+          const goal = window.CurrentGoal || '';
           
           // Hide unselected strategy options
-          document.querySelectorAll('.strategy-option').forEach((btn: Element) => {
-            if ((btn.textContent?.toLowerCase() !== this.selectedStrategy?.toLowerCase())) {
+          document.querySelectorAll('.strategy-option').forEach((btn) => {
+            if ((btn as HTMLElement).textContent?.toLowerCase() !== this.selectedStrategy) {
               btn.classList.add('hidden');
             }
           });
@@ -179,7 +182,7 @@ class Wizard {
           const encodedUrl = encodeURIComponent(window.location.href);
           
           // Construct webhook URL with query parameters
-          const webhookUrl = `https://dealwizard.app.n8n.cloud/webhook/ffdd965e-5f7e-4ff2-af4d-a68c3d4546c9?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy || '')}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
+          const webhookUrl = `https://dealwizard.app.n8n.cloud/webhook/ffdd965e-5f7e-4ff2-af4d-a68c3d4546c9?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy as string)}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
 
           logger.info('[DEAL-WIZARD][COMMUNICATION] Sending data to webhook:', {
             endpoint: webhookUrl
@@ -189,24 +192,50 @@ class Wizard {
           fetch(webhookUrl, {
             method: 'GET'
           })
-          .then(response => {
+          .then(async (response) => {
             logger.info('[DEAL-WIZARD][COMMUNICATION] Received response status:', response.status);
-            return response.json();
+            logger.info('[DEAL-WIZARD][COMMUNICATION] Webhook URL:', webhookUrl);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the raw text first
+            const text = await response.text();
+            logger.info('[DEAL-WIZARD][COMMUNICATION] Raw response:', text);
+            logger.info('[DEAL-WIZARD][COMMUNICATION] Response length:', text.length);
+            
+            // Try to parse as JSON if we have content
+            if (!text) {
+              throw new Error(`Empty response received from ${webhookUrl}`);
+            }
+            
+            try {
+              return JSON.parse(text) as WebhookResponseData;
+            } catch (e) {
+              throw new Error(`Invalid JSON response from ${webhookUrl}. Response: ${text.substring(0, 100)}...`);
+            }
           })
-          .then((responseData: WebhookResponse) => {
+          .then((responseData: WebhookResponseData) => {
             logger.info('[DEAL-WIZARD][COMMUNICATION] Webhook response data:', responseData);
-            // Extract destination URL from response data
-            let destinationUrl = responseData.destinationUrl || responseData[0]?.destinationUrl;
-            this.startAnalysis(destinationUrl);
+            if (!responseData || !responseData.unique_id) {
+              throw new Error(`Response missing unique_id from ${webhookUrl}`);
+            }
+            // Extract unique_id from response data
+            let uniqueId = responseData.unique_id;
+            this.startAnalysis(uniqueId);
             resolve();
           })
-          .catch(error => {
+          .catch((error: Error) => {
             logger.error('[DEAL-WIZARD][COMMUNICATION] Webhook error:', {
               error: error.message,
-              stack: error.stack
+              stack: error.stack,
+              webhookUrl: webhookUrl
             });
-            // Continue with analysis even if webhook fails
-            this.startAnalysis(null);
+            new Toast("Failed to start analysis. Please try again.").show();
+            if (this.icon) {
+              this.icon.classList.remove("pulsing");
+            }
             resolve();
           });
         } else {
@@ -224,31 +253,79 @@ class Wizard {
   /**
    * Start the property analysis process
    */
-  private startAnalysis(destinationUrl: string | null | undefined): void {
-    chrome.runtime.sendMessage({ 
-      action: "analyze", 
-      strategy: this.selectedStrategy,
-      destinationUrl: destinationUrl
-    }, (response) => {
-      this.transformToDeal(response);
-    });
+  private startAnalysis(uniqueId: string): void {
+    // Construct the destination URL with the unique ID
+    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
+    
+    // Start polling for analysis status
+    if (uniqueId) {
+      this.analysisChecker.startPolling(
+        uniqueId,
+        (status: any) => {
+          // On success
+          logger.info('Analysis completed successfully', status);
+          this.transformToDeal(status);
+        },
+        (error: Error | string) => {
+          // On error
+          logger.error('Analysis failed', error);
+          new Toast("Analysis failed. Please try again.").show();
+          if (this.icon) {
+            this.icon.classList.remove("pulsing");
+          }
+        }
+      );
+    } else {
+      logger.error('No uniqueId provided for analysis');
+      new Toast("Analysis failed. Please try again.").show();
+      if (this.icon) {
+        this.icon.classList.remove("pulsing");
+      }
+    }
   }
 
   /**
    * Transform to deal view after analysis
    */
-  private transformToDeal(response: any): void {
-    if (this.icon) {
-      this.icon.classList.remove("pulsing");
-      this.icon.classList.add("rm-transition-out");
+  private transformToDeal(response: DealResponse): void {
+    if (!this.icon) return;
+    
+    this.icon.classList.remove("pulsing");
+    this.icon.classList.add("rm-transition-out");
 
-      this.icon.addEventListener("animationend", () => {
-        if (this.icon) {
-          const deal = new Deal(this.icon, response);
-          deal.initialize();
+    logger.debug('Transforming to deal with response:', response);
+
+    this.icon.addEventListener("animationend", () => {
+      if (!this.icon) return;
+      
+      // Use the full unique ID from the response
+      const deal = new Deal(this.icon, { uniqueId: response._id || response.unique_id });
+      deal.initialize();
+      
+      // Wait for the deal icon to be fully initialized before opening the tab
+      setTimeout(() => {
+        // Only open the tab if the deal icon is available and visible
+        const dealIcon = document.querySelector('#rm-hover-icon:not(.rm-transition-out)');
+        if (dealIcon && deal.destinationUrl) {
+          logger.info('Deal icon is ready, opening deal URL:', deal.destinationUrl);
+          chrome.runtime.sendMessage({ 
+            action: "analyze",  // Updated from type to action
+            strategy: this.selectedStrategy || '',
+            destinationUrl: deal.destinationUrl
+          }, (response: { success: boolean, data?: { tabId: number }, error?: string }) => {
+            if (response?.success && response.data?.tabId) {
+              deal.setCreatedTabId(response.data.tabId);
+              logger.info('[DEAL-WIZARD][NAVIGATION] Background tab opened after deal icon ready:', { 
+                destinationUrl: deal.destinationUrl,
+                tabId: response.data.tabId 
+              });
+            }
+          });
+        } else {
+          logger.info('Deal icon not ready or no destination URL available');
         }
-      }, { once: true });
-    }
+      }, 500); // Give enough time for the deal icon to be fully initialized
+    }, { once: true });
   }
 }
 

@@ -202,7 +202,7 @@ function setupEventListeners(): void {
     logger.log('Received goal data:', event.detail);
     if (event.detail && event.detail.goal) {
       currentGoal = event.detail.goal;
-      window.currentGoal = currentGoal;
+      window.CurrentGoal = currentGoal;
     }
   }) as EventListener);
 }
