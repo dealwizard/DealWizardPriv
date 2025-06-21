@@ -13,24 +13,27 @@ class Strategy {
   private wrapper: HTMLElement;
   private onStrategySelect: StrategySelectCallback;
   selectedStrategy: string | null;
-  
+
   constructor(wrapper: HTMLElement, onStrategySelect: StrategySelectCallback) {
     logger.info('Initializing Strategy');
     this.wrapper = wrapper;
     this.onStrategySelect = onStrategySelect;
     this.selectedStrategy = null;
-    
+
     this.initialize();
   }
 
   async initialize(): Promise<void> {
     logger.info('Loading saved strategy');
     // Load saved strategy or use default
-    this.selectedStrategy = await StrategyStorage.getSelectedStrategy() || DEFAULT_STRATEGY;
+    this.selectedStrategy = (await StrategyStorage.getSelectedStrategy()) || DEFAULT_STRATEGY;
     logger.info('Using strategy:', this.selectedStrategy);
 
     // If using default strategy, save it
-    if (this.selectedStrategy === DEFAULT_STRATEGY && !(await StrategyStorage.getSelectedStrategy())) {
+    if (
+      this.selectedStrategy === DEFAULT_STRATEGY &&
+      !(await StrategyStorage.getSelectedStrategy())
+    ) {
       await StrategyStorage.saveSelectedStrategy(DEFAULT_STRATEGY);
     }
 
@@ -81,10 +84,10 @@ class Strategy {
   async handleStrategySelect(strategy: string): Promise<void> {
     logger.info('Strategy selected:', strategy);
     this.selectedStrategy = strategy;
-    
+
     // Save to storage
     await StrategyStorage.saveSelectedStrategy(strategy);
-    
+
     // Update UI
     this.updateUI(strategy);
 
@@ -97,7 +100,7 @@ class Strategy {
 
   updateUI(strategy: string | null): void {
     if (!strategy) return;
-    
+
     logger.info('Updating UI for strategy:', strategy);
     document.querySelectorAll('.strategy-option').forEach((btn: Element) => {
       btn.classList.remove('selected');

@@ -9,13 +9,13 @@
   font-size: 14px;
   font-weight: 500;
   z-index: 10001;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(4px);
   transition: opacity 0.4s ease;
   opacity: 0;
 }
 
 .toast.success {
-  background-color: rgba(40, 167, 69, 0.85);  /* Bootstrap's green with some transparency */
+  background-color: rgba(40, 167, 69, 0.85); /* Bootstrap's green with some transparency */
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
-} 
+}

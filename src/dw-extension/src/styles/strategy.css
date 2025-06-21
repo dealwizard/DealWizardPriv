@@ -30,18 +30,20 @@
   top: -145px;
   right: 20px;
   z-index: 10001;
-  
+
   /* Appearance */
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 8px;
   min-width: 120px;
-  
+
   /* Visibility transition */
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
   pointer-events: none;
 }
 
@@ -65,17 +67,17 @@
   background: none;
   border: none;
   width: 100%;
-  
+
   /* Layout and spacing */
   padding: 8px 12px;
   text-align: left;
   white-space: nowrap;
-  
+
   /* Typography */
   color: #333;
   font-size: 14px;
   font-weight: 500;
-  
+
   /* Interactivity */
   cursor: pointer;
   border-radius: 4px;
@@ -96,7 +98,7 @@
 }
 
 .strategy-option.selected::after {
-  content: "✓";
+  content: '✓';
   position: absolute;
   right: 12px;
   top: 50%;
@@ -108,4 +110,4 @@
 /* Hide unselected strategy after wizard click */
 .strategy-option.hidden {
   display: none;
-} 
+}

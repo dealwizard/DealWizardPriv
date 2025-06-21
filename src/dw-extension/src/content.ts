@@ -8,7 +8,6 @@ import Toast from './compontents/toast';
 import Wizard from './compontents/wizzard';
 import { ExtensionMessage, ExtensionResponse, logger } from './utils';
 
-
 logger.log('Content script initialized');
 
 // CSS styles to be injected into the page
@@ -81,27 +80,27 @@ const createTooltip = () => {
   const tooltip = document.createElement('div');
   tooltip.className = 'dw-extension-tooltip';
   document.body.appendChild(tooltip);
-  
+
   // Add event listeners to show/hide the tooltip on highlighted elements
-  document.addEventListener('mouseover', (e) => {
+  document.addEventListener('mouseover', e => {
     const target = e.target as HTMLElement;
     if (target.classList.contains('dw-extension-highlight')) {
       tooltip.textContent = `${target.tagName.toLowerCase()} - DealWizard highlighted element`;
       tooltip.classList.add('visible');
-      
+
       // Position the tooltip near the mouse
       document.addEventListener('mousemove', positionTooltip);
     }
   });
-  
-  document.addEventListener('mouseout', (e) => {
+
+  document.addEventListener('mouseout', e => {
     const target = e.target as HTMLElement;
     if (target.classList.contains('dw-extension-highlight')) {
       tooltip.classList.remove('visible');
       document.removeEventListener('mousemove', positionTooltip);
     }
   });
-  
+
   const positionTooltip = (e: MouseEvent) => {
     tooltip.style.left = `${e.pageX + 10}px`;
     tooltip.style.top = `${e.pageY + 10}px`;
@@ -112,7 +111,7 @@ const createTooltip = () => {
 const initializeModules = (): void => {
   try {
     logger.log('Initializing DealWizard modules');
-    
+
     // Assign imported modules to window object
     window.Toast = Toast;
     window.StrategyStorage = StrategyStorage;
@@ -121,7 +120,7 @@ const initializeModules = (): void => {
     window.Deal = Deal;
     window.Goal = Goal;
     window.Wizard = Wizard;
-    
+
     logger.log('All DealWizard modules initialized successfully');
     initializeComponents();
   } catch (error) {
@@ -148,7 +147,7 @@ function initializeComponents(): void {
   }
 
   logger.log('Attempting to initialize DealWizard components');
-  
+
   if (wizardInitialized) {
     logger.log('Components already initialized, skipping');
     return;
@@ -161,7 +160,7 @@ function initializeComponents(): void {
 
     // Create wrapper first
     const wrapper = createWizardWrapper();
-    
+
     logger.log('Creating new Wizard instance');
     new window.Wizard();
     logger.log('Wizard initialized successfully');
@@ -215,19 +214,19 @@ function handleWizardClick(): void {
 // Example functionality that can be triggered from popup
 const performAction = (): ExtensionResponse => {
   logger.log('Performing action on the current page');
-  
+
   try {
     // Example: highlighting some elements on the page
     const headings = document.querySelectorAll('h1, h2');
     let count = 0;
-    
+
     headings.forEach(heading => {
       heading.classList.toggle('dw-extension-highlight');
       if (heading.classList.contains('dw-extension-highlight')) {
         count++;
       }
     });
-    
+
     return { success: true, data: { count, state: count > 0 ? 'added' : 'removed' } };
   } catch (error) {
     logger.error('Error performing action:', error);
@@ -240,10 +239,10 @@ const initialize = () => {
   injectStyles();
   createTooltip();
   setupEventListeners();
-  
+
   // Initialize modules instead of dynamically loading them
   initializeModules();
-  
+
   // Try initializing components when the DOM is ready
   if (document.readyState === 'loading') {
     logger.log('Document still loading, waiting for DOMContentLoaded');
@@ -263,28 +262,26 @@ const initialize = () => {
       initializeComponents();
     }
   });
-  
+
   // Listen for messages from popup or background script
-  chrome.runtime.onMessage.addListener((
-    message: ExtensionMessage, 
-    sender, 
-    sendResponse: (response: ExtensionResponse) => void
-  ) => {
-    logger.log('Content script received message:', message);
-    
-    switch (message.action) {
-      case 'performAction':
-        const result = performAction();
-        sendResponse(result);
-        break;
-        
-      default:
-        sendResponse({ success: false, error: 'Unknown action' });
+  chrome.runtime.onMessage.addListener(
+    (message: ExtensionMessage, sender, sendResponse: (response: ExtensionResponse) => void) => {
+      logger.log('Content script received message:', message);
+
+      switch (message.action) {
+        case 'performAction':
+          const result = performAction();
+          sendResponse(result);
+          break;
+
+        default:
+          sendResponse({ success: false, error: 'Unknown action' });
+      }
+
+      return true; // Keep the message channel open for asynchronous response
     }
-    
-    return true; // Keep the message channel open for asynchronous response
-  });
-  
+  );
+
   logger.log('Content script fully initialized');
 };
 

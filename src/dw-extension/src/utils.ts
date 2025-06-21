@@ -18,7 +18,7 @@ export interface ExtensionResponse {
 export enum StorageKeys {
   SETTINGS = 'settings',
   USER_DATA = 'userData',
-  ENABLED = 'isEnabled'
+  ENABLED = 'isEnabled',
 }
 
 // Settings interface
@@ -37,9 +37,9 @@ export const sendMessage = async (message: ExtensionMessage): Promise<ExtensionR
     return response || { success: false, error: 'No response' };
   } catch (error) {
     console.error('Error sending message:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 };
@@ -48,7 +48,7 @@ export const sendMessage = async (message: ExtensionMessage): Promise<ExtensionR
 export const getStorageData = async <T>(key: StorageKeys): Promise<T | null> => {
   try {
     const data = await chrome.storage.local.get(key);
-    return data[key] as T || null;
+    return (data[key] as T) || null;
   } catch (error) {
     console.error(`Error getting storage data for key ${key}:`, error);
     return null;
@@ -78,5 +78,5 @@ export const logger = {
   },
   warn: (message: string, ...args: any[]) => {
     console.warn(`[DW Extension Warning] ${message}`, ...args);
-  }
+  },
 };

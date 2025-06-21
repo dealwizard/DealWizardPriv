@@ -14,7 +14,7 @@ class Toast implements ToastInterface {
   message: string;
   styleClass: string;
   popup: HTMLDivElement | null;
-  
+
   static activeToasts: Toast[] = [];
 
   constructor(message: string, styleClass: string = '') {
@@ -26,7 +26,7 @@ class Toast implements ToastInterface {
   static removeAll(): void {
     Toast.activeToasts.forEach(toast => {
       if (toast.popup) {
-        toast.popup.style.opacity = "0";
+        toast.popup.style.opacity = '0';
         setTimeout(() => {
           toast.popup?.remove();
         }, 300);
@@ -37,13 +37,13 @@ class Toast implements ToastInterface {
 
   show(): void {
     // If this is a "Deal ready!" toast, remove all existing toasts first
-    if (this.message === "Deal ready!") {
+    if (this.message === 'Deal ready!') {
       Toast.removeAll();
     }
 
-    this.popup = document.createElement("div");
+    this.popup = document.createElement('div');
     this.popup.textContent = this.message;
-    this.popup.classList.add("toast");
+    this.popup.classList.add('toast');
     if (this.styleClass) {
       this.popup.classList.add(this.styleClass);
     }
@@ -54,14 +54,14 @@ class Toast implements ToastInterface {
     // Fade in
     requestAnimationFrame(() => {
       if (this.popup) {
-        this.popup.style.opacity = "1";
+        this.popup.style.opacity = '1';
       }
     });
 
     // Auto-remove after 5 seconds
     setTimeout(() => {
       if (this.popup) {
-        this.popup.style.opacity = "0";
+        this.popup.style.opacity = '0';
         setTimeout(() => {
           this.popup?.remove();
           const index = Toast.activeToasts.indexOf(this);

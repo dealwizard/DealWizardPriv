@@ -1,193 +1,193 @@
 .goal-icon-container {
-    position: fixed;
-    bottom: 150px;
-    right: 320px;
-    z-index: 10001;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 1;
-    transform: scale(1);
-    transition: all 0.3s ease;
+  position: fixed;
+  bottom: 150px;
+  right: 320px;
+  z-index: 10001;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.3s ease;
 }
 
 .goal-icon-container.show-icon {
-    opacity: 1;
-    transform: scale(1);
+  opacity: 1;
+  transform: scale(1);
 }
 
 .goal-icon-container.scale-up {
-    transform: scale(1.2);
-    z-index: 10002;
+  transform: scale(1.2);
+  z-index: 10002;
 }
 
 .goal-icon-container.glowing {
-    transform: scale(1.2);
+  transform: scale(1.2);
 }
 
 .goal-icon-container.glowing .goal-icon {
-    filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.8));
-    animation: pulse-glow 2s infinite;
+  filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.8));
+  animation: pulse-glow 2s infinite;
 }
 
 /* When wizard is visible and goal icon is hovered */
 #rm-hover-icon:not(.rm-transition-out) ~ .goal-wrapper .goal-icon-container:hover {
-    transform: scale(1.5) rotate(0deg);
-    z-index: 10002; /* Ensure it stays above other elements when scaled */
+  transform: scale(1.5) rotate(0deg);
+  z-index: 10002; /* Ensure it stays above other elements when scaled */
 }
 
 #rm-hover-icon:not(.rm-transition-out) ~ .goal-wrapper .goal-icon-container:hover .goal-icon {
-    filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.8));
+  filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.8));
 }
 
 @keyframes pulse-glow {
-    0% {
-        filter: drop-shadow(0 0 8px rgba(74, 144, 226, 0.6));
-    }
-    50% {
-        filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.8));
-    }
-    100% {
-        filter: drop-shadow(0 0 8px rgba(74, 144, 226, 0.6));
-    }
+  0% {
+    filter: drop-shadow(0 0 8px rgba(74, 144, 226, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 8px rgba(74, 144, 226, 0.6));
+  }
 }
 
 @keyframes iconEntrance {
-    0% {
-        opacity: 0;
-        transform: scale(0) rotate(-180deg);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-    }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .goal-input-container {
-    background-color: transparent;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-family: Arial, sans-serif;
-    width: 0;
-    opacity: 0;
-    box-sizing: border-box;
-    position: fixed;
-    bottom: 150px;
-    right: 360px;
-    z-index: 10000;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    overflow: hidden;
-    height: 32px;
-    display: flex;
-    align-items: center;
+  background-color: transparent;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: Arial, sans-serif;
+  width: 0;
+  opacity: 0;
+  box-sizing: border-box;
+  position: fixed;
+  bottom: 150px;
+  right: 360px;
+  z-index: 10000;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  overflow: hidden;
+  height: 32px;
+  display: flex;
+  align-items: center;
 }
 
 .goal-input-container.expanded {
-    width: 250px;
-    opacity: 1;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    pointer-events: auto;
+  width: 250px;
+  opacity: 1;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
 }
 
 .goal-header {
-    margin-bottom: 16px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
 }
 
 .goal-header h3 {
-    margin: 0;
-    color: #333;
-    font-size: 18px;
+  margin: 0;
+  color: #333;
+  font-size: 18px;
 }
 
 .goal-content {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    align-items: center;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
 }
 
 .goal-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    white-space: nowrap;
-    height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  white-space: nowrap;
+  height: 100%;
 }
 
 .goal-icon {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-    margin: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .goal-icon.glow {
-    filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.8));
-    animation: pulse-glow 2s infinite;
+  filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.8));
+  animation: pulse-glow 2s infinite;
 }
 
 .goal-item label {
-    color: #666;
-    font-size: 14px;
-    white-space: nowrap;
+  color: #666;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
-.goal-item input[type="text"] {
-    flex: 1;
-    padding: 6px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: white;
-    min-width: 150px;
-    height: 24px;
-    box-sizing: border-box;
-    transition: all 0.3s ease;
+.goal-item input[type='text'] {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  min-width: 150px;
+  height: 24px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
-.goal-item input[type="text"]:disabled {
-    background-color: rgba(40, 167, 69, 0.1);
-    border-color: #28a745;
-    color: #28a745;
-    cursor: not-allowed;
-    box-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
+.goal-item input[type='text']:disabled {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-color: #28a745;
+  color: #28a745;
+  cursor: not-allowed;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
 }
 
-.goal-item input[type="text"]:disabled:hover {
-    border-color: #28a745;
+.goal-item input[type='text']:disabled:hover {
+  border-color: #28a745;
 }
 
 .goal-item input:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
 .goal-item input:hover {
-    border-color: #999;
+  border-color: #999;
 }
 
 .goal-item select {
-    flex: 1;
-    padding: 6px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: white;
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
 }
 
 /* Hover effects */
 .goal-item select:hover {
-    border-color: #999;
-} 
+  border-color: #999;
+}

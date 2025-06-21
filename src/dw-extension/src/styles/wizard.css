@@ -6,7 +6,9 @@
   height: 164px;
   cursor: pointer;
   z-index: 10000;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   object-fit: contain;
   border-radius: 50%;
   background-color: white;
@@ -49,4 +51,4 @@
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 170, 255, 0);
   }
-} 
+}
