@@ -1,11 +1,11 @@
 // Content script that runs on web pages
-import Deal from './compontents/deal';
-import Goal from './compontents/goal';
-import GoalStorage from './compontents/goalStorage';
-import Strategy from './compontents/strategy';
-import StrategyStorage from './compontents/strategyStorage';
-import Toast from './compontents/toast';
-import Wizard from './compontents/wizzard';
+import Deal from './components/deal';
+import Goal from './components/goal';
+import GoalStorage from './components/goalStorage';
+import Strategy from './components/strategy';
+import StrategyStorage from './components/strategyStorage';
+import Toast from './components/toast';
+import Wizard from './components/wizzard';
 import { ExtensionMessage, ExtensionResponse, logger } from './utils';
 
 logger.log('Content script initialized');
