@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4] - 2024-03-20
+
+### Added
+- Automatic background tab opening when deal analysis completes
+- Click-to-focus functionality for the deal icon to switch to the deal tab
+
+### Changed
+- Modified deal icon behavior to automatically open tabs
+- Updated deal icon tooltip to reflect new functionality
+
 ## [0.3] - 2024-03-19
 
 ### Fixed

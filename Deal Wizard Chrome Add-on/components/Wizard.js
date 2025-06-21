@@ -2,6 +2,7 @@ import LoggerFactory from '../tools/logger.js';
 import Toast from './Toast.js';
 import Strategy from './Strategy.js';
 import Deal from './Deal.js';
+import AnalysisChecker from '../tools/analysisChecker.js';
 
 const logger = LoggerFactory.getLogger('DEAL-WIZARD/WIZARD');
 logger.info('Wizard.js loaded');
@@ -15,6 +16,7 @@ class Wizard {
     this.destinationUrl = null;
     this.selectedStrategy = null;
     this.strategy = null;
+    this.analysisChecker = new AnalysisChecker();
     
     // Create UI elements
     this.initializeUI();
@@ -164,24 +166,48 @@ class Wizard {
           fetch(webhookUrl, {
             method: 'GET'
           })
-          .then(response => {
+          .then(async response => {
             logger.info('[DEAL-WIZARD][COMMUNICATION] Received response status:', response.status);
-            return response.json();
+            logger.info('[DEAL-WIZARD][COMMUNICATION] Webhook URL:', webhookUrl);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the raw text first
+            const text = await response.text();
+            logger.info('[DEAL-WIZARD][COMMUNICATION] Raw response:', text);
+            logger.info('[DEAL-WIZARD][COMMUNICATION] Response length:', text.length);
+            
+            // Try to parse as JSON if we have content
+            if (!text) {
+              throw new Error(`Empty response received from ${webhookUrl}`);
+            }
+            
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              throw new Error(`Invalid JSON response from ${webhookUrl}. Response: ${text.substring(0, 100)}...`);
+            }
           })
           .then(responseData => {
             logger.info('[DEAL-WIZARD][COMMUNICATION] Webhook response data:', responseData);
-            // Extract destination URL from response data
-            let destinationUrl = responseData.destinationUrl || responseData[0]?.destinationUrl;
-            this.startAnalysis(destinationUrl);
+            if (!responseData || !responseData.unique_id) {
+              throw new Error(`Response missing unique_id from ${webhookUrl}`);
+            }
+            // Extract unique_id from response data
+            let uniqueId = responseData.unique_id;
+            this.startAnalysis(uniqueId);
             resolve();
           })
           .catch(error => {
             logger.error('[DEAL-WIZARD][COMMUNICATION] Webhook error:', {
               error: error.message,
-              stack: error.stack
+              stack: error.stack,
+              webhookUrl: webhookUrl
             });
-            // Continue with analysis even if webhook fails
-            this.startAnalysis(null);
+            new Toast("Failed to start analysis. Please try again.").show();
+            this.icon.classList.remove("pulsing");
             resolve();
           });
         } else {
@@ -199,15 +225,31 @@ class Wizard {
   /**
    * Start the property analysis process
    */
-  startAnalysis(destinationUrl) {
-    chrome.runtime.sendMessage({ 
-      type: "analyze", 
-      url: window.location.href,
-      strategy: this.selectedStrategy,
-      destinationUrl: destinationUrl
-    }, (response) => {
-      this.transformToDeal(response);
-    });
+  startAnalysis(uniqueId) {
+    // Construct the destination URL with the unique ID
+    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
+    
+    // Start polling for analysis status
+    if (uniqueId) {
+      this.analysisChecker.startPolling(
+        uniqueId,
+        (status) => {
+          // On success
+          logger.info('Analysis completed successfully', status);
+          this.transformToDeal(status);
+        },
+        (error) => {
+          // On error
+          logger.error('Analysis failed', error);
+          new Toast("Analysis failed. Please try again.").show();
+          this.icon.classList.remove("pulsing");
+        }
+      );
+    } else {
+      logger.error('No uniqueId provided for analysis');
+      new Toast("Analysis failed. Please try again.").show();
+      this.icon.classList.remove("pulsing");
+    }
   }
 
   /**
@@ -217,9 +259,35 @@ class Wizard {
     this.icon.classList.remove("pulsing");
     this.icon.classList.add("rm-transition-out");
 
+    logger.debug('Transforming to deal with response:', response);
+
     this.icon.addEventListener("animationend", () => {
-      const deal = new Deal(this.icon, response);
+      // Use the full unique ID from the response
+      const deal = new Deal(this.icon, { uniqueId: response._id || response.unique_id });
       deal.initialize();
+      
+      // Wait for the deal icon to be fully initialized before opening the tab
+      setTimeout(() => {
+        // Only open the tab if the deal icon is available and visible
+        const dealIcon = document.querySelector('#rm-hover-icon:not(.rm-transition-out)');
+        if (dealIcon && deal.destinationUrl) {
+          logger.info('Deal icon is ready, opening deal URL:', deal.destinationUrl);
+          chrome.runtime.sendMessage({ 
+            type: "analyze", 
+            destinationUrl: deal.destinationUrl
+          }, (response) => {
+            if (response && response.tabId) {
+              deal.setCreatedTabId(response.tabId);
+              logger.info('[DEAL-WIZARD][NAVIGATION] Background tab opened after deal icon ready:', { 
+                destinationUrl: deal.destinationUrl,
+                tabId: response.tabId 
+              });
+            }
+          });
+        } else {
+          logger.info('Deal icon not ready or no destination URL available');
+        }
+      }, 500); // Give enough time for the deal icon to be fully initialized
     }, { once: true });
   }
 }
