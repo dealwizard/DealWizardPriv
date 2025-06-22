@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Deal Wizard",
+  "version": "1.0.0",
+  "description": "A Chrome Extension for DealWizzard.ai",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.rightmove.co.uk/properties/*"],
+      "js": ["content.js"],
+      "css": [
+        "styles/wizard.css",
+        "styles/deal.css",
+        "styles/toast.css",
+        "styles/strategy.css",
+        "styles/goal.css"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://www.rightmove.co.uk/properties/*"],
+      "include_globs": ["*channel=RES_BUY*"],
+      "js": ["content.js"],
+      "css": [
+        "styles/wizard.css",
+        "styles/deal.css",
+        "styles/toast.css",
+        "styles/strategy.css",
+        "styles/goal.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "styles/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://www.rightmove.co.uk/*",
+    "https://dealwizard.app.n8n.cloud/*",
+    "https://deal-wizard-home-61532.bubbleapps.io/*"
+  ],
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}

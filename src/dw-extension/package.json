@@ -1,0 +1,40 @@
+{
+  "name": "dw-extension",
+  "version": "1.0.0",
+  "description": "Chrome Extension built with TypeScript and Webpack",
+  "main": "dist/background.js",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "watch": "webpack --watch --mode=development",
+    "dev": "webpack --mode=development",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"src/**/*.{js,ts,json,css,html}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts,json,css,html}\"",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "typescript",
+    "webpack"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chrome": "^0.0.326",
+    "copy-webpack-plugin": "^13.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.5.3",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
+  },
+  "lint-staged": {
+    "src/**/*.{js,ts,json,css,html}": [
+      "prettier --write"
+    ]
+  }
+}
