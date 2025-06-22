@@ -1,13 +1,9 @@
+import { DealResponse } from '../types';
 import LoggerFactory, { Logger } from '../utils/logger';
 import Toast from './toast';
 
 const logger: Logger = LoggerFactory.getLogger('DEAL-WIZARD/DEAL');
 logger.info('Deal.js loaded');
-
-interface DealResponse {
-  uniqueId?: string;
-  [key: string]: any;
-}
 
 class Deal {
   private icon: HTMLImageElement;

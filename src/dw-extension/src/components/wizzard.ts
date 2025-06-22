@@ -1,3 +1,4 @@
+import { DealResponse, WebhookResponseData } from '../types';
 import AnalysisChecker from '../utils/analysisChecker';
 import LoggerFactory, { Logger } from '../utils/logger';
 import Deal from './deal';
@@ -6,17 +7,6 @@ import Toast from './toast';
 
 const logger: Logger = LoggerFactory.getLogger('DEAL-WIZARD/WIZARD');
 logger.info('Wizard.js loaded');
-
-interface DealResponse {
-  _id?: string;
-  unique_id?: string;
-  [key: string]: any;
-}
-
-interface WebhookResponseData {
-  unique_id: string;
-  [key: string]: any;
-}
 
 class Wizard {
   private icon: HTMLImageElement | null;
@@ -115,13 +105,13 @@ class Wizard {
     );
 
     // Hover tracking
-    wrapper.addEventListener('mouseenter', () => {
-      logger.info('Mouse entered wizard wrapper');
-    });
+    // wrapper.addEventListener('mouseenter', () => {
+    //   logger.info('Mouse entered wizard wrapper');
+    // });
 
-    wrapper.addEventListener('mouseleave', () => {
-      logger.info('Mouse left wizard wrapper');
-    });
+    // wrapper.addEventListener('mouseleave', () => {
+    //   logger.info('Mouse left wizard wrapper');
+    // });
   }
 
   /**

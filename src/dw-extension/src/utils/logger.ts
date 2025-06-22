@@ -1,22 +1,4 @@
-// Verbosity levels
-enum LogLevel {
-  ERROR = 0,
-  WARN = 1,
-  INFO = 2,
-  DEBUG = 3,
-  TRACE = 4,
-}
-
-interface ILogger {
-  context: string;
-  level: LogLevel;
-  setLevel(level: LogLevel): ILogger;
-  trace(message: string, ...args: any[]): void;
-  debug(message: string, ...args: any[]): void;
-  info(message: string, ...args: any[]): void;
-  warn(message: string, ...args: any[]): void;
-  error(message: string, ...args: any[]): void;
-}
+import { Logger as ILogger, LogLevel } from '../types/utils';
 
 class Logger implements ILogger {
   context: string;
@@ -25,6 +7,9 @@ class Logger implements ILogger {
   constructor(context: string, level: LogLevel = LogLevel.INFO) {
     this.context = context;
     this.level = level;
+  }
+  log(...args: any[]): void {
+    throw new Error('Method not implemented.');
   }
 
   setLevel(level: LogLevel): Logger {
@@ -91,4 +76,5 @@ class LoggerFactory {
   }
 }
 
-export { LogLevel, Logger, LoggerFactory as default };
+export { LoggerFactory as default, Logger, LogLevel };
+

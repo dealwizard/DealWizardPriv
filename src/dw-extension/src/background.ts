@@ -1,11 +1,13 @@
 // Background script (Service Worker in Manifest V3)
 import {
+  AnalyzeMessage,
   ExtensionMessage,
   ExtensionResponse,
   ExtensionSettings,
-  logger,
-  StorageKeys,
-} from './utils';
+  FocusTabMessage,
+  StorageKeys
+} from './types';
+import { logger } from './utils';
 
 logger.log('Background script initialized');
 
@@ -18,18 +20,6 @@ const DEFAULT_SETTINGS: ExtensionSettings = {
     showAnalytics: false,
   },
 };
-
-// Define additional message types
-interface AnalyzeMessage extends ExtensionMessage {
-  action: 'analyze';
-  strategy: string;
-  destinationUrl: string;
-}
-
-interface FocusTabMessage extends ExtensionMessage {
-  action: 'focusTab';
-  tabId: number;
-}
 
 // Example of using the chrome API
 chrome.runtime.onInstalled.addListener(() => {

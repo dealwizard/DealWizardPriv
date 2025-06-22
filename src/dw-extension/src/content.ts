@@ -6,7 +6,11 @@ import Strategy from './components/strategy';
 import StrategyStorage from './components/strategyStorage';
 import Toast from './components/toast';
 import Wizard from './components/wizzard';
-import { ExtensionMessage, ExtensionResponse, logger } from './utils';
+import { ExtensionMessage, ExtensionResponse } from './types';
+import { logger } from './utils';
+
+// Import global type extensions
+import './types/global';
 
 logger.log('Content script initialized');
 
@@ -57,13 +61,13 @@ const STYLES = `
 // Declare window interfaces for our components
 declare global {
   interface Window {
-    Toast: any;
-    StrategyStorage: any;
-    GoalStorage: any;
-    Strategy: any;
-    Deal: any;
-    Goal: any;
-    Wizard: any;
+    Toast: typeof Toast;
+    StrategyStorage: typeof StrategyStorage;
+    GoalStorage: typeof GoalStorage;
+    Strategy: typeof Strategy;
+    Deal: typeof Deal;
+    Goal: typeof Goal;
+    Wizard: typeof Wizard;
     CurrentGoal: string;
   }
 }

@@ -1,9 +1,10 @@
+import { StorageKeys } from '../types';
 import LoggerFactory from '../utils/logger';
 
 const logger = LoggerFactory.getLogger('DEAL-WIZARD/GOAL/STORAGE');
 logger.info('Loading goal storage module');
 
-const GOAL_KEY = 'investmentGoal';
+const GOAL_KEY = StorageKeys.GOALS;
 
 // Define interfaces for goal storage
 interface GoalChangeInfo {
@@ -58,7 +59,7 @@ class GoalStorage {
   static async clearGoal(): Promise<void> {
     logger.info('Attempting to clear goal');
     try {
-      await chrome.storage.sync.remove([GOAL_KEY]);
+      await chrome.storage.sync.remove([GOAL_KEY as string]);
       logger.info('Successfully cleared goal');
     } catch (error) {
       logger.error('Error clearing goal:', error);

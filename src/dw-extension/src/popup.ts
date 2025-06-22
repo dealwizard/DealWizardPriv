@@ -1,5 +1,6 @@
 // Popup script
-import { ExtensionResponse, ExtensionSettings, logger, sendMessage } from './utils';
+import { ExtensionResponse, ExtensionSettings } from './types';
+import { logger, sendMessage } from './utils';
 
 logger.log('Popup script loaded');
 

@@ -2,33 +2,12 @@
  * Utility functions and shared types for the extension
  */
 
-// Message types for communication between different parts of the extension
-export interface ExtensionMessage {
-  action: string;
-  payload?: any;
-}
-
-export interface ExtensionResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
-
-// Storage keys
-export enum StorageKeys {
-  SETTINGS = 'settings',
-  USER_DATA = 'userData',
-  ENABLED = 'isEnabled',
-}
-
-// Settings interface
-export interface ExtensionSettings {
-  theme: 'light' | 'dark';
-  notifications: boolean;
-  features?: {
-    [key: string]: boolean;
-  };
-}
+// Import types from centralized type definitions
+import {
+  ExtensionMessage,
+  ExtensionResponse,
+  StorageKeys
+} from './types';
 
 // Utility functions
 export const sendMessage = async (message: ExtensionMessage): Promise<ExtensionResponse> => {

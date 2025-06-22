@@ -4,10 +4,7 @@ import GoalStorage from './goalStorage';
 const logger = LoggerFactory.getLogger('DEAL-WIZARD/STRATEGY/STORAGE');
 
 logger.trace('Goal module loaded');
-
-interface GoalEventDetail {
-  goal: string;
-}
+type GoalEventDetail = { goal: string };
 
 class Goal {
   private container: HTMLElement;

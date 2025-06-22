@@ -1,28 +1,13 @@
+import { BubbleStatus, BubbleStatusResponse } from '../types';
 import LoggerFactory, { LogLevel } from '../utils/logger';
-
-/**
- * Interface for Bubble.io API response
- */
-interface BubbleStatusResponse {
-  response?: BubbleStatus;
-}
-
-/**
- * Interface for the status object returned by Bubble.io
- */
-interface BubbleStatus {
-  reportstatus_text?: string;
-  error?: string;
-  [key: string]: any;
-}
 
 /**
  * Class responsible for checking the status of Bubble.io report generation
  */
 class AnalysisChecker {
   // Static constants
-  private static readonly BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io';
   private static readonly DEFAULT_POLLING_INTERVAL = 5000; // 5 seconds
+  private static readonly BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io';
 
   private isPolling: boolean;
   private pollingInterval: NodeJS.Timeout | null;
@@ -44,12 +29,7 @@ class AnalysisChecker {
    * @param interval - Optional polling interval in milliseconds
    * @returns void
    */
-  public startPolling(
-    uniqueId: string,
-    onComplete: (status: BubbleStatus) => void,
-    onError: (error: Error | string) => void,
-    interval: number = AnalysisChecker.DEFAULT_POLLING_INTERVAL
-  ): void {
+  public startPolling(uniqueId: string, onComplete: (status: BubbleStatus) => void, onError: (error: Error | string) => void, interval: number = AnalysisChecker.DEFAULT_POLLING_INTERVAL): void {
     this.logger.info('[POLLING] Starting polling process', {
       uniqueId,
       interval,
