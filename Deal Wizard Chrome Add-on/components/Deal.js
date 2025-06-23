@@ -1,7 +1,8 @@
 import LoggerFactory from '../tools/logger.js';
 import Toast from './Toast.js';
+import { DEAL_WIZARD_BASE_URL, LOG_LEVEL } from '../constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/DEAL');
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/DEAL', LOG_LEVEL);
 logger.info('Deal.js loaded');
 
 class Deal {
@@ -10,11 +11,27 @@ class Deal {
     this.response = response;
     // Use the complete uniqueId for the URL
     this.destinationUrl = response?.uniqueId ? 
-      `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${response.uniqueId}` : 
+      `${DEAL_WIZARD_BASE_URL}/${response.uniqueId}` : 
       null;
     this.createdTabId = null; // Store the created tab ID
     
     logger.debug('Deal constructed with URL:', this.destinationUrl);
+
+    // Immediately open the tab if URL is available
+    if (this.destinationUrl) {
+      chrome.runtime.sendMessage({ 
+        type: "analyze", 
+        destinationUrl: this.destinationUrl
+      }, (response) => {
+        if (response && response.tabId) {
+          this.setCreatedTabId(response.tabId);
+          logger.info('[DEAL-WIZARD][NAVIGATION] Background tab opened immediately:', { 
+            destinationUrl: this.destinationUrl,
+            tabId: response.tabId 
+          });
+        }
+      });
+    }
   }
 
   initialize() {

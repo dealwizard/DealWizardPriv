@@ -3,13 +3,15 @@ const loadAllModules = async () => {
   let logger;
   try {
     // Import modules in the correct order
-    const { default: LoggerFactory, LogLevel } = await import(chrome.runtime.getURL('tools/logger.js'));
+    const { default: loggerFactory, LogLevel } = await import(chrome.runtime.getURL('tools/logger.js'));
+    const { LOG_LEVEL, VERSION } = await import(chrome.runtime.getURL('constants.js'));
 
     // Set TRACE level for all components
-    LoggerFactory.setDefaultLevel(LogLevel.TRACE);
+    loggerFactory.setDefaultLevel(LogLevel.TRACE);
 
     // Get content logger
-    logger = LoggerFactory.getLogger('DEAL-WIZARD/CONTENT');
+    logger = loggerFactory.getLogger('DEAL-WIZARD/CONTENT');
+    logger.info(`Deal Wizard ${VERSION} initialized`);
     logger.trace('Logger initialized with TRACE level');
     
     logger.trace('Setting up component logging levels');

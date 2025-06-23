@@ -1,17 +1,20 @@
 import LoggerFactory, { LogLevel } from './logger.js';
+import { BUBBLE_API_URL, LOG_LEVEL, ANALYSIS_CHECKER_LOG_LEVEL } from '../constants.js';
+
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/ANALYSIS-CHECKER', ANALYSIS_CHECKER_LOG_LEVEL);
 
 /**
  * Class responsible for checking the status of Bubble.io report generation
  */
 class AnalysisChecker {
     // Static constants
-    static BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io';
-    static DEFAULT_POLLING_INTERVAL = 5000; // 10 seconds
+    static BUBBLE_API_URL = BUBBLE_API_URL;
+    static DEFAULT_POLLING_INTERVAL = 5000; // 5 seconds
 
     constructor() {
         this.isPolling = false;
         this.pollingInterval = null;
-        this.logger = LoggerFactory.getLogger('DEAL-WIZARD/CHECKER');
+        this.logger = LoggerFactory.getLogger('DEAL-WIZARD/CHECKER', LOG_LEVEL);
         this.logger.setLevel(LogLevel.DEBUG); // Set to DEBUG level to reduce verbosity
         this.logger.info('AnalysisChecker initialized');
     }

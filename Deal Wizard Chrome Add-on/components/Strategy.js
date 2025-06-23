@@ -1,8 +1,9 @@
 import LoggerFactory from '../tools/logger.js';
 import Toast from './Toast.js';
 import StrategyStorage from './strategyStorage.js';
+import { LOG_LEVEL } from '../constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/STRATEGY');
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/STRATEGY', LOG_LEVEL);
 logger.info('Strategy.js loaded');
 
 const DEFAULT_STRATEGY = 'flip';

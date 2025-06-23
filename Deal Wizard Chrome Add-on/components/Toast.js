@@ -1,6 +1,7 @@
 import LoggerFactory from '../tools/logger.js';
+import { LOG_LEVEL } from '../constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/TOAST');
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/TOAST', LOG_LEVEL);
 logger.info('Toast.js loaded');
 
 class Toast {

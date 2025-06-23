@@ -1,7 +1,9 @@
 import LoggerFactory from '../tools/logger.js';
 import GoalStorage from './goalStorage.js';
+import Toast from './Toast.js';
+import { LOG_LEVEL } from '../constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/GOAL');
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/GOAL', LOG_LEVEL);
 logger.trace('Goal.js loaded');
 
 class Goal {

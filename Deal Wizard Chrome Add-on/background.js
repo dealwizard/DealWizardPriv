@@ -1,6 +1,8 @@
-import LoggerFactory from './tools/logger.js';
+import loggerFactory from './tools/logger.js';
+import { LOG_LEVEL, VERSION } from './constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/BACKGROUND');
+const logger = loggerFactory.getLogger('DEAL-WIZARD/BACKGROUND');
+logger.info(`Deal Wizard ${VERSION} background service started`);
 
 // Handle messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

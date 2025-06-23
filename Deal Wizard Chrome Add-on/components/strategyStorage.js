@@ -1,6 +1,7 @@
 import LoggerFactory from '../tools/logger.js';
+import { LOG_LEVEL } from '../constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/STRATEGY/STORAGE');
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/STRATEGY/STORAGE', LOG_LEVEL);
 logger.info('Loading storage module');
 
 const SELECTED_STRATEGY_KEY = 'selectedStrategy';

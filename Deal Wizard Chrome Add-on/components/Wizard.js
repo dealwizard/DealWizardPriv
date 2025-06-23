@@ -3,8 +3,9 @@ import Toast from './Toast.js';
 import Strategy from './Strategy.js';
 import Deal from './Deal.js';
 import AnalysisChecker from '../tools/analysisChecker.js';
+import { DEAL_WIZARD_BASE_URL, LOG_LEVEL } from '../constants.js';
 
-const logger = LoggerFactory.getLogger('DEAL-WIZARD/WIZARD');
+const logger = LoggerFactory.getLogger('DEAL-WIZARD/WIZARD', LOG_LEVEL);
 logger.info('Wizard.js loaded');
 
 class Wizard {
@@ -227,7 +228,7 @@ class Wizard {
    */
   startAnalysis(uniqueId) {
     // Construct the destination URL with the unique ID
-    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
+    const destinationUrl = `${DEAL_WIZARD_BASE_URL}/${uniqueId}`;
     
     // Start polling for analysis status
     if (uniqueId) {
@@ -261,33 +262,12 @@ class Wizard {
 
     logger.debug('Transforming to deal with response:', response);
 
+    // Create the Deal instance immediately
+    const deal = new Deal(this.icon, { uniqueId: response._id || response.unique_id });
+    
+    // Handle the icon animation separately
     this.icon.addEventListener("animationend", () => {
-      // Use the full unique ID from the response
-      const deal = new Deal(this.icon, { uniqueId: response._id || response.unique_id });
       deal.initialize();
-      
-      // Wait for the deal icon to be fully initialized before opening the tab
-      setTimeout(() => {
-        // Only open the tab if the deal icon is available and visible
-        const dealIcon = document.querySelector('#rm-hover-icon:not(.rm-transition-out)');
-        if (dealIcon && deal.destinationUrl) {
-          logger.info('Deal icon is ready, opening deal URL:', deal.destinationUrl);
-          chrome.runtime.sendMessage({ 
-            type: "analyze", 
-            destinationUrl: deal.destinationUrl
-          }, (response) => {
-            if (response && response.tabId) {
-              deal.setCreatedTabId(response.tabId);
-              logger.info('[DEAL-WIZARD][NAVIGATION] Background tab opened after deal icon ready:', { 
-                destinationUrl: deal.destinationUrl,
-                tabId: response.tabId 
-              });
-            }
-          });
-        } else {
-          logger.info('Deal icon not ready or no destination URL available');
-        }
-      }, 500); // Give enough time for the deal icon to be fully initialized
     }, { once: true });
   }
 }
