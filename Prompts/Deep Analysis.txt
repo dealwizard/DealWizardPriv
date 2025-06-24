@@ -14,6 +14,7 @@ Objective: Optimize cost to maximize Flip profit.
 - Justify each proposed change or investment
 - Pay special attention to signs of damp or structural issues
 - While naming area, be very concise - use up to three words, but less is better
+- Provide information about the type of Refurbishment (low-cost, high-end, pragmatic, mid-range, or other)
 Final output: list by most important to list important of all items as refurbBreakdown and a total as overallCost
 
 ---
@@ -119,6 +120,7 @@ Task 16: Provide reasons how I can negotiate price down
 - The item on the list should be: What - Price down potential
 - Assess the probability that I can negotiate the price down
 - The value should be from 1 to 99, 99 being the high probability that I can negotiate price successfully
+- Look for dump on the images. Explicitly point out on which image you can see the dump - describe the image (kitchen, living room, small bedroom, etc...) rather than giving the number of the image or the file name of the image
 
 ---
 
