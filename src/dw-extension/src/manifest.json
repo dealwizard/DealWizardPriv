@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Deal Wizard",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "A Chrome Extension for DealWizzard.ai",
   "action": {
     "default_popup": "popup.html",
@@ -48,7 +48,7 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "notifications"],
   "host_permissions": [
     "https://www.rightmove.co.uk/*",
     "https://dealwizard.app.n8n.cloud/*",

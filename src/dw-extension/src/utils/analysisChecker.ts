@@ -177,7 +177,7 @@ class AnalysisChecker {
    * @returns Promise resolving to the operation status
    */
   private async checkBubbleStatus(uniqueId: string): Promise<BubbleStatus> {
-    const url = `${AnalysisChecker.BUBBLE_API_URL}/api/1.1/obj/properties/${uniqueId}`;
+    const url = `${AnalysisChecker.BUBBLE_API_URL}/version-test/api/1.1/obj/properties/${uniqueId}`;
     this.logger.info('[API] Making request to Bubble.io', {
       uniqueId,
       url,

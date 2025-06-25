@@ -15,8 +15,11 @@ class Deal {
     this.icon = icon;
     this.response = response;
     // Use the complete uniqueId for the URL
+    var destination =  `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${response.uniqueId}`
+    //var destination =  `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${response.uniqueId}`
+    
     this.destinationUrl = response?.uniqueId
-      ? `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${response.uniqueId}`
+      ? destination
       : null;
     this.createdTabId = null; // Store the created tab ID
 

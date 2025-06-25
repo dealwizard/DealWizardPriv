@@ -175,7 +175,7 @@ class Wizard {
           const encodedUrl = encodeURIComponent(window.location.href);
 
           // Construct webhook URL with query parameters
-          const webhookUrl = `https://dealwizard.app.n8n.cloud/webhook/ffdd965e-5f7e-4ff2-af4d-a68c3d4546c9?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy as string)}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
+          const webhookUrl = `https://dealwizard.app.n8n.cloud/webhook/ffe87ebe-495e-43b8-859b-b9bacccb9519?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy as string)}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
 
           logger.info('[DEAL-WIZARD][COMMUNICATION] Sending data to webhook:', {
             endpoint: webhookUrl,
@@ -253,7 +253,8 @@ class Wizard {
    */
   private startAnalysis(uniqueId: string): void {
     // Construct the destination URL with the unique ID
-    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
+    //const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
+    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${uniqueId}`
 
     // Start polling for analysis status
     if (uniqueId) {

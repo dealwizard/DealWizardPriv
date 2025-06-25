@@ -36,5 +36,10 @@
     "src/**/*.{js,ts,json,css,html}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@firebase/app": "^0.13.1",
+    "@firebase/messaging": "^0.12.21",
+    "firebase": "^11.9.1"
   }
 }

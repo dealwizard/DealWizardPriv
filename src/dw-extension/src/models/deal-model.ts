@@ -42,6 +42,7 @@ export class DealModel {
    * Get the destination URL for the deal analysis
    */
   getDestinationUrl(): string {
-    return `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${this.id}`;
+    //return `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${this.id}`;
+    return `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${this.id}`
   }
 }
