@@ -1,5 +1,6 @@
-import { DealResponse, WebhookResponseData } from '../types';
+import { DealResponse, StorageKeys, WebhookResponseData } from '../types';
 import AnalysisChecker from '../utils/analysisChecker';
+import { ConfigService } from '../utils/config';
 import LoggerFactory, { Logger } from '../utils/logger';
 import Deal from './deal';
 import Strategy from './strategy';
@@ -131,6 +132,19 @@ class Wizard {
   }
 
   /**
+   * Get FCM token from storage
+   */
+  private async getFCMToken(): Promise<string | null> {
+    try {
+      const stored = await chrome.storage.local.get(StorageKeys.FCM_TOKEN);
+      return stored.fcmToken || null;
+    } catch (error) {
+      logger.error('Failed to get FCM token from storage:', error);
+      return null;
+    }
+  }
+
+  /**
    * Handle the first click on the wizard icon
    */
   private async handleFirstClick(): Promise<void> {
@@ -138,6 +152,14 @@ class Wizard {
       logger.info('No strategy selected');
       new Toast('Please select a strategy (FLIP, BTL, or HMO) first').show();
       return;
+    }
+
+    // Get FCM token
+    const fcmToken = await this.getFCMToken();
+    if (fcmToken) {
+      logger.info('FCM token retrieved:', fcmToken);
+    } else {
+      logger.warn('No FCM token available');
     }
 
     // Get current goal value from custom event and wait for response
@@ -174,11 +196,18 @@ class Wizard {
           // First encode the URL separately to handle special characters
           const encodedUrl = encodeURIComponent(window.location.href);
 
-          // Construct webhook URL with query parameters
-          const webhookUrl = `https://dealwizard.app.n8n.cloud/webhook/ffe87ebe-495e-43b8-859b-b9bacccb9519?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy as string)}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
+          // Construct webhook URL with query parameters (now including FCM token if available)
+          const webhookUrlBase = ConfigService.apiWebhookUrl();
+          let webhookUrl = `${webhookUrlBase}?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy as string)}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
+          
+          // Add FCM token to webhook URL if available
+          if (fcmToken) {
+            webhookUrl += `&fcmToken=${encodeURIComponent(fcmToken)}`;
+          }
 
           logger.info('[DEAL-WIZARD][COMMUNICATION] Sending data to webhook:', {
             endpoint: webhookUrl,
+            hasFCMToken: !!fcmToken
           });
 
           // Send GET request to webhook
@@ -252,10 +281,6 @@ class Wizard {
    * Start the property analysis process
    */
   private startAnalysis(uniqueId: string): void {
-    // Construct the destination URL with the unique ID
-    //const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${uniqueId}`;
-    const destinationUrl = `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${uniqueId}`
-
     // Start polling for analysis status
     if (uniqueId) {
       this.analysisChecker.startPolling(

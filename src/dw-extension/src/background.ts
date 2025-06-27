@@ -4,45 +4,58 @@ import { getToken } from '@firebase/messaging';
 import { getMessaging, onBackgroundMessage } from '@firebase/messaging/sw';
 import { AnalyzeMessage, ExtensionMessage, ExtensionResponse, ExtensionSettings, FocusTabMessage, StorageKeys } from './types';
 import { logger } from './utils';
+import { ConfigService } from './utils/config';
 
 logger.log('Background script initialized');
+logger.log(`Environment: ${ConfigService.getEnvironment()}`);
+logger.log(`Debug mode: ${ConfigService.isDebugEnabled()}`);
 
-const firebaseApp = initializeApp({
-  apiKey: 'AIzaSyDzN7lYBje6ycLNxNXjneLA68EqtsdpQe0',
-  authDomain: 'fcmtranning-183dd.firebaseapp.com',
-  projectId: 'fcmtranning-183dd',
-  storageBucket: 'fcmtranning-183dd.firebasestorage.app',
-  messagingSenderId: '530816358326',
-  appId: '1:530816358326:web:698a8e7f5b09af3803d317',
-});
+// Now this will work in service worker context
+const firebaseConfig = ConfigService.getConfig().firebase;
+if (!firebaseConfig) {
+  throw new Error('Firebase configuration is missing');
+}
 
+const firebaseApp = initializeApp(firebaseConfig);
 const messaging = getMessaging(firebaseApp);
 
 
 // Example of using the chrome API
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   logger.log('Extension installed');
 
-  // try {
-  //   const token = await getToken(messaging, {
-  //     serviceWorkerRegistration: (self as any).registration,
-  //   });
-  //   console.log('FCM token:', token);
-  //   const stored = await chrome.storage.local.get(StorageKeys.FCM_TOKEN);
+  // Open welcome page on fresh install (not on updates)
+  if (details.reason === 'install') {
+    try {
+      const welcomeUrl = ConfigService.getConfig().welcomePageUrl;
+      if (welcomeUrl) {
+        await chrome.tabs.create({ 
+          url: welcomeUrl,
+          active: true 
+        });
+        logger.log('Welcome page opened:', welcomeUrl);
+      }
+    } catch (err) {
+      logger.error('Failed to open welcome page:', err);
+    }
+  }
 
-  //   if (stored.fcmToken !== token) {
-  //     // await fetch('https://your-backend.com/update', {
-  //     //   method: 'POST',
-  //     //   body: JSON.stringify({ fcmToken: token }),
-  //     // });
+  // Handle FCM token generation
+  try {
+    const token = await getToken(messaging, {
+      serviceWorkerRegistration: (self as any).registration,
+    });
+    console.log('FCM token:', token);
+    const stored = await chrome.storage.local.get(StorageKeys.FCM_TOKEN);
 
-  //     await chrome.storage.local.set({
-  //       [StorageKeys.FCM_TOKEN]: token,
-  //     });
-  //   }
-  // } catch (err) {
-  //   console.error('Failed to get FCM token:', err);
-  // }
+    if (stored.fcmToken !== token) {
+      await chrome.storage.local.set({
+        [StorageKeys.FCM_TOKEN]: token,
+      });
+    }
+  } catch (err) {
+    console.error('Failed to get FCM token:', err);
+  }
 });
 
 // Example of handling messages from content script or popup

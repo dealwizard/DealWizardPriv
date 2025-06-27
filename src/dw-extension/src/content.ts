@@ -8,11 +8,13 @@ import Toast from './components/toast';
 import Wizard from './components/wizzard';
 import { ExtensionMessage, ExtensionResponse } from './types';
 import { logger } from './utils';
+import { ConfigService } from './utils/config';
 
 // Import global type extensions
 import './types/global';
 
 logger.log('Content script initialized');
+logger.log(`Running in ${ConfigService.getEnvironment()} environment`);
 
 // CSS styles to be injected into the page
 const STYLES = `

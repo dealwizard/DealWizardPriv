@@ -1,4 +1,5 @@
 import { Logger as ILogger, LogLevel } from '../types/utils';
+import { ConfigService } from './config';
 
 class Logger implements ILogger {
   context: string;
@@ -6,10 +7,12 @@ class Logger implements ILogger {
 
   constructor(context: string, level: LogLevel = LogLevel.INFO) {
     this.context = context;
-    this.level = level;
+    this.level = ConfigService.isDebugEnabled() ? LogLevel.DEBUG : level;
   }
   log(...args: any[]): void {
-    throw new Error('Method not implemented.');
+    if (this.level >= LogLevel.INFO) {
+      console.log(`[INFO] [${this.context}] `, ...args);
+    }
   }
 
   setLevel(level: LogLevel): Logger {

@@ -1,5 +1,6 @@
 import { BubbleStatus, BubbleStatusResponse } from '../types';
 import LoggerFactory, { LogLevel } from '../utils/logger';
+import { ConfigService } from './config';
 
 /**
  * Class responsible for checking the status of Bubble.io report generation
@@ -7,7 +8,6 @@ import LoggerFactory, { LogLevel } from '../utils/logger';
 class AnalysisChecker {
   // Static constants
   private static readonly DEFAULT_POLLING_INTERVAL = 5000; // 5 seconds
-  private static readonly BUBBLE_API_URL = 'https://deal-wizard-home-61532.bubbleapps.io';
 
   private isPolling: boolean;
   private pollingInterval: NodeJS.Timeout | null;
@@ -177,7 +177,7 @@ class AnalysisChecker {
    * @returns Promise resolving to the operation status
    */
   private async checkBubbleStatus(uniqueId: string): Promise<BubbleStatus> {
-    const url = `${AnalysisChecker.BUBBLE_API_URL}/version-test/api/1.1/obj/properties/${uniqueId}`;
+    const url = ConfigService.getBubblePropertiesApi(uniqueId)
     this.logger.info('[API] Making request to Bubble.io', {
       uniqueId,
       url,

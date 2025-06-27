@@ -1,4 +1,5 @@
 import { DealResponse } from '../types';
+import { ConfigService } from '../utils/config';
 import LoggerFactory, { Logger } from '../utils/logger';
 import Toast from './toast';
 
@@ -10,17 +11,17 @@ class Deal {
   private response: DealResponse;
   public destinationUrl: string | null;
   private createdTabId: number | null;
-
+  
   constructor(icon: HTMLImageElement, response: DealResponse) {
     this.icon = icon;
     this.response = response;
     // Use the complete uniqueId for the URL
-    var destination =  `https://deal-wizard-home-61532.bubbleapps.io/version-test/new_product_page/${response.uniqueId}`
-    //var destination =  `https://deal-wizard-home-61532.bubbleapps.io/new_product_page/${response.uniqueId}`
     
-    this.destinationUrl = response?.uniqueId
-      ? destination
-      : null;
+    if (!response || !response.uniqueId) {
+      throw new Error('Invalid deal response: uniqueId is missing');
+    }
+    this.destinationUrl  = ConfigService.getBubbleProductPage(response.uniqueId);
+      
     this.createdTabId = null; // Store the created tab ID
 
     logger.debug('Deal constructed with URL:', this.destinationUrl);
