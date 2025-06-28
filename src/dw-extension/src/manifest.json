@@ -40,6 +40,11 @@
         "styles/goal.css"
       ],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["https://deal-wizard-home-61532.bubbleapps.io/*"],
+      "js": ["content_home.js"],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

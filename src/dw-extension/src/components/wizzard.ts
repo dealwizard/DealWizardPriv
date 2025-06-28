@@ -162,6 +162,8 @@ class Wizard {
       logger.warn('No FCM token available');
     }
 
+    const userId = await chrome.storage.local.get(StorageKeys.USER_ID);
+    
     // Get current goal value from custom event and wait for response
     return new Promise<void>(resolve => {
       const goalEvent = new CustomEvent('getGoalValue', {
@@ -198,11 +200,19 @@ class Wizard {
 
           // Construct webhook URL with query parameters (now including FCM token if available)
           const webhookUrlBase = ConfigService.apiWebhookUrl();
-          let webhookUrl = `${webhookUrlBase}?url=${encodedUrl}&strategy=${encodeURIComponent(this.selectedStrategy as string)}&goal=${encodeURIComponent(goal)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
+          let webhookUrl = `${webhookUrlBase}?url=${encodedUrl}
+              &strategy=${encodeURIComponent(this.selectedStrategy as string)}
+              &goal=${encodeURIComponent(goal)}
+              &timestamp=${encodeURIComponent(new Date().toISOString())}`;
           
           // Add FCM token to webhook URL if available
           if (fcmToken) {
             webhookUrl += `&fcmToken=${encodeURIComponent(fcmToken)}`;
+          }
+
+          if(userId){
+            webhookUrl += `&userId=${encodeURIComponent(userId.userId)}`;
+            
           }
 
           logger.info('[DEAL-WIZARD][COMMUNICATION] Sending data to webhook:', {

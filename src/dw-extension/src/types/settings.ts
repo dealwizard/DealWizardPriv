@@ -10,7 +10,8 @@ export enum StorageKeys {
   ENABLED = 'isEnabled',
   GOALS = 'goals',
   STRATEGIES = 'strategies',
-  FCM_TOKEN = 'fcmToken'
+  FCM_TOKEN = 'fcmToken',
+  USER_ID = 'userId'
 }
 
 // Extension settings interface

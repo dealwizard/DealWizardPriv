@@ -45,6 +45,13 @@ export interface PerformActionMessage extends ExtensionMessage {
   action: 'performAction';
 }
 
+export interface UserIdDetectedMessage extends ExtensionMessage {
+  action: 'USER_ID_DETECTED';
+  userId: string | null;
+  timestamp: number;
+  url: string;
+}
+
 // Event interfaces
 export interface WizardClickEvent extends CustomEvent {
   detail: {

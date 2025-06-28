@@ -17,6 +17,7 @@ module.exports = (env, argv) => {
       background: './src/background.ts',
       popup: './src/popup.ts',
       content: './src/content.ts',
+      content_home: './src/content_home.ts',
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
