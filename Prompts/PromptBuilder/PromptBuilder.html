@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Builder</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+            height: 100vh;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            flex: 1 1 auto;
+            width: 95vw;
+            height: 90vh;
+            margin: 2vh auto 0 auto;
+            background-color: white;
+            padding: 32px 32px 32px 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .strategy-section, .prompt-section {
+            margin-bottom: 20px;
+        }
+        
+        .strategy-section label, .prompt-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .strategy-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .strategy-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .prompt-section {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .prompt-textarea {
+            flex: 1 1 auto;
+            width: 100%;
+            min-height: 0;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            box-sizing: border-box;
+            margin-bottom: 0;
+        }
+        
+        .prompt-textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .save-status {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .save-status.saved {
+            color: #28a745;
+        }
+        
+        .save-status.unsaved {
+            color: #dc3545;
+        }
+        
+        .header-flex {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .header-title {
+            margin: 0 16px 0 0;
+            font-size: 2rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .header-label {
+            margin: 0 8px 0 0;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+        .header-input {
+            min-width: 180px;
+            max-width: 250px;
+        }
+        .header-status {
+            margin: 0 0 0 12px;
+            min-width: 160px;
+        }
+        @media (max-width: 1200px) {
+            .container {
+                width: 99vw;
+                padding: 12px;
+            }
+        }
+        @media (max-width: 800px) {
+            .header-flex {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .header-title, .header-label, .header-input, .header-status {
+                margin: 0;
+            }
+            .header-status {
+                min-width: 0;
+            }
+            .container {
+                width: 100vw;
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-flex">
+            <h1 class="header-title">Prompt Builder</h1>
+            <label for="strategy-input" class="header-label">Strategy:</label>
+            <input 
+                type="text" 
+                id="strategy-input" 
+                class="strategy-input header-input" 
+                placeholder="Enter strategy name..."
+            >
+            <div id="save-status" class="save-status header-status"></div>
+            <button id="refresh-btn" style="margin-left:16px; padding:6px 18px; font-size:1rem; border-radius:5px; border:1px solid #007bff; background:#f0f8ff; color:#007bff; cursor:pointer;">Refresh</button>
+            <button id="save-btn" style="margin-left:8px; padding:6px 18px; font-size:1rem; border-radius:5px; border:1px solid #28a745; background:#f8fff8; color:#28a745; cursor:pointer;">Save</button>
+        </div>
+        
+        <div class="prompt-section">
+            <label for="prompt-text">Prompt:</label>
+            <textarea 
+                id="prompt-text" 
+                class="prompt-textarea" 
+                placeholder="Enter your prompt here..."
+            ></textarea>
+            <label for="rendered-prompt" style="margin-top:16px;">Prompt with inserts:</label>
+            <textarea id="rendered-prompt" class="prompt-textarea" style="background:#f8f8f8; color:#333; margin-top:0;" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const strategyInput = document.getElementById('strategy-input');
+        const promptTextarea = document.getElementById('prompt-text');
+        const saveStatus = document.getElementById('save-status');
+        const renderedPrompt = document.getElementById('rendered-prompt');
+        
+        // State management
+        let currentStrategy = '';
+        let isDirty = false;
+        let saveTimeout;
+        
+        // Load prompt.txt from strategy folder
+        async function loadPromptFromStrategy(strategyName) {
+            if (!strategyName || strategyName.trim() === '') {
+                return;
+            }
+            
+            try {
+                // Create folder path based on strategy name
+                const cacheBuster = `cb=${Date.now()}`;
+                const folderPath = `./${strategyName.trim()}/prompt.txt?${cacheBuster}`;
+                const response = await fetch(folderPath);
+                
+                if (response.ok) {
+                    const content = await response.text();
+                    promptTextarea.value = content;
+                    updateSaveStatus(`Loaded from ${folderPath}`, 'saved');
+                    isDirty = false;
+                    await updateRenderedPrompt();
+                } else {
+                    console.warn(`prompt.txt not found in folder: ${folderPath}`);
+                    updateSaveStatus(`No prompt.txt found in ${strategyName} folder`, 'unsaved');
+                    await updateRenderedPrompt();
+                }
+            } catch (error) {
+                console.warn(`Could not load prompt.txt from ${strategyName} folder:`, error);
+                updateSaveStatus(`Error loading from ${strategyName} folder`, 'unsaved');
+                await updateRenderedPrompt();
+            }
+        }
+        
+        // Save state to localStorage
+        function saveState() {
+            const state = {
+                strategy: strategyInput.value,
+                prompt: promptTextarea.value,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('promptBuilderState', JSON.stringify(state));
+            isDirty = false;
+            updateSaveStatus('Saved', 'saved');
+        }
+        
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('promptBuilderState');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    strategyInput.value = state.strategy || '';
+                    promptTextarea.value = state.prompt || '';
+                    currentStrategy = state.strategy || '';
+                    updateSaveStatus('Loaded from saved state', 'saved');
+                    
+                    // If we have a strategy, try to load its prompt.txt
+                    if (state.strategy && state.strategy.trim() !== '') {
+                        loadPromptFromStrategy(state.strategy);
+                    }
+                } catch (error) {
+                    console.warn('Could not load saved state:', error);
+                }
+            }
+        }
+        
+        // Update save status display
+        function updateSaveStatus(message, type = '') {
+            saveStatus.textContent = message;
+            saveStatus.className = `save-status ${type}`;
+        }
+        
+        // Debounced save function
+        function debouncedSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                if (isDirty) {
+                    saveState();
+                }
+            }, 1000);
+        }
+        
+        // Utility: Replace <<filename>> and {{filename}} tags with content from strategy folder
+        async function renderPromptWithHTML(prompt, strategy) {
+            if (!strategy || !prompt) return prompt;
+            let result = prompt;
+            const cacheBuster = `cb=${Date.now()}`;
+            const replacements = [];
+
+            // Handle <<filename>> tags (HTML, JSON, etc.)
+            const angleTagRegex = /<<([^<>]+)>>/g;
+            let match;
+            while ((match = angleTagRegex.exec(prompt)) !== null) {
+                const filename = match[1].trim();
+                const filePath = `./${strategy}/${filename}?${cacheBuster}`;
+                try {
+                    const resp = await fetch(filePath);
+                    if (resp.ok) {
+                        let content;
+                        if (filename.toLowerCase().endsWith('.json')) {
+                            const jsonData = await resp.json();
+                            content = JSON.stringify(jsonData, null, 2);
+                        } else {
+                            content = await resp.text();
+                        }
+                        replacements.push({ tag: match[0], content });
+                    } else {
+                        replacements.push({ tag: match[0], content: `[File not found: ${filename}]` });
+                    }
+                } catch (error) {
+                    replacements.push({ tag: match[0], content: `[Error loading: ${filename}]` });
+                }
+            }
+
+            // Handle {{filename}} tags (JSON, text, etc.)
+            const curlyTagRegex = /{{([^{}]+)}}/g;
+            let curlyMatch;
+            while ((curlyMatch = curlyTagRegex.exec(prompt)) !== null) {
+                let filename = curlyMatch[1].trim();
+                // Ensure filename ends with .json
+                if (!filename.toLowerCase().endsWith('.json')) {
+                    filename += '.json';
+                }
+                const filePath = `./${strategy}/${filename}?${cacheBuster}`;
+                try {
+                    const resp = await fetch(filePath);
+                    if (resp.ok) {
+                        let content;
+                        // Always treat as JSON since we force .json extension
+                        const jsonData = await resp.json();
+                        content = JSON.stringify(jsonData, null, 2);
+                        replacements.push({ tag: curlyMatch[0], content });
+                    } else {
+                        replacements.push({ tag: curlyMatch[0], content: `[File not found: ${filename}]` });
+                    }
+                } catch (error) {
+                    replacements.push({ tag: curlyMatch[0], content: `[Error loading: ${filename}]` });
+                }
+            }
+
+            // Replace all tags with their content
+            for (const { tag, content } of replacements) {
+                result = result.replace(tag, content);
+            }
+            return result;
+        }
+
+        // Update rendered prompt textarea
+        async function updateRenderedPrompt() {
+            const prompt = promptTextarea.value;
+            const strategy = strategyInput.value.trim();
+            const rendered = await renderPromptWithHTML(prompt, strategy);
+            renderedPrompt.value = rendered;
+        }
+        
+        // Event listeners
+        strategyInput.addEventListener('input', () => {
+            isDirty = true;
+            updateSaveStatus('Unsaved changes', 'unsaved');
+            debouncedSave();
+            updateRenderedPrompt();
+        });
+        
+        promptTextarea.addEventListener('input', () => {
+            isDirty = true;
+            updateSaveStatus('Unsaved changes', 'unsaved');
+            debouncedSave();
+            updateRenderedPrompt();
+        });
+        
+        // Load prompt when strategy changes (with debounce)
+        let strategyLoadTimeout;
+        strategyInput.addEventListener('input', () => {
+            clearTimeout(strategyLoadTimeout);
+            strategyLoadTimeout = setTimeout(() => {
+                const newStrategy = strategyInput.value.trim();
+                if (newStrategy !== currentStrategy && newStrategy !== '') {
+                    currentStrategy = newStrategy;
+                    loadPromptFromStrategy(newStrategy);
+                    updateRenderedPrompt();
+                }
+            }, 1500); // Wait 1.5 seconds after user stops typing
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            updateRenderedPrompt();
+        });
+        
+        // Save on page unload
+        window.addEventListener('beforeunload', () => {
+            if (isDirty) {
+                saveState();
+            }
+        });
+
+        // Refresh button handler
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
+            // Optionally reload state from localStorage
+            loadState();
+            await updateRenderedPrompt();
+            updateSaveStatus('Refreshed', 'saved');
+        });
+
+        // Save button handler
+        document.getElementById('save-btn').addEventListener('click', async () => {
+            const strategy = strategyInput.value.trim();
+            const prompt = promptTextarea.value;
+            if (!strategy) {
+                updateSaveStatus('Strategy name required to save!', 'unsaved');
+                return;
+            }
+            try {
+                const resp = await fetch('/save-prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ strategy, prompt })
+                });
+                if (resp.ok) {
+                    updateSaveStatus('Saved to prompt.txt!', 'saved');
+                } else {
+                    updateSaveStatus('Failed to save prompt.txt', 'unsaved');
+                }
+            } catch (e) {
+                updateSaveStatus('Error saving prompt.txt', 'unsaved');
+            }
+        });
+    </script>
+</body>
+</html>
